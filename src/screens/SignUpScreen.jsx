@@ -1,14 +1,32 @@
 import { useState } from 'react';
 import {
-  View, Text, StyleSheet, TextInput, TouchableOpacity,
+  View, Text, StyleSheet, TextInput, TouchableOpacity, Alert,
 } from 'react-native';
+import firebase from 'firebase';
 
 import Button from '../components/Button';
 
-export default function SingUpScreen(props) {
+export default function LoginScreen(props) {
   const { navigation } = props;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  function handlePress() {
+    firebase.auth().createUserWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        const { user } = userCredential;
+        console.log(user.uid);
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'MemoList' }],
+        });
+      })
+      .catch((error) => {
+        console.log(error.code, error.massage);
+        Alert.alert(error.code);
+      });
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.inner}>
@@ -31,18 +49,13 @@ export default function SingUpScreen(props) {
           secureTextEntry
           textContentType="password"
         />
-
         <Button
           label="Submit"
-          onPress={() => {
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'MemoList' }],
-            });
-          }}
+          // eslint-disable-next-line react/jsx-no-bind
+          onPress={handlePress}
         />
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Already registerd?</Text>
+          <Text style={styles.footerText}>Not registered?</Text>
           <TouchableOpacity
             onPress={() => {
               navigation.reset({
@@ -51,9 +64,10 @@ export default function SingUpScreen(props) {
               });
             }}
           >
-            <Text style={styles.footerLink}>Log In</Text>
+            <Text style={styles.footerLink}>Sign up here</Text>
           </TouchableOpacity>
         </View>
+
       </View>
     </View>
 
@@ -68,8 +82,6 @@ const styles = StyleSheet.create({
   inner: {
     paddingHrizontal: 27,
     paddingVertical: 24,
-    marginLeft: 8,
-    marginRight: 8,
   },
   title: {
     fontSize: 24,
